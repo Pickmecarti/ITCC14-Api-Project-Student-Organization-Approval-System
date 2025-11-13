@@ -1,10 +1,10 @@
 # ITCC14-Api-Project-Student-Organization-Approval-System
 
 Members
-1. Sai Joy Bacalso
+1. 
 2. Joshua Argel Detchaca 
-3. Florie Ann Madrono
-4. Mary Angeli Talian
+3. 
+4. 
 
 Milestone 1 (Nov Week 1): Project Proposal & Introduction
 What we'll do:
