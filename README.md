@@ -2,9 +2,9 @@
 
 Members
 1. Name
-2. Joshua Argel B. Detchaca
-3. Florie Ann C. Madroño
-4. Name
+2. Joshua Argel Detchaca 
+3. Florie Ann Madrono
+4. Mary Angeli Talian
 
 Milestone 1 (Nov Week 1): Project Proposal & Introduction
 What we'll do:
