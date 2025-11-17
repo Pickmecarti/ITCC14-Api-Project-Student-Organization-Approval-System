@@ -1,1592 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Approval System</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --secondary: #3b82f6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --student: #8b5cf6;
-            --admin: #059669;
-            --light: #f8fafc;
-            --dark: #1e293b;
-            --gray: #64748b;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        
-        body {
-            background-color: #f1f5f9;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-        
-        /* Auth Styles */
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            padding: 1rem;
-        }
-        
-        .auth-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .auth-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .auth-icon {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .auth-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-        
-        .auth-subtitle {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-        
-        .role-tabs {
-            display: flex;
-            background: #e2e8f0;
-            border-radius: 8px;
-            padding: 4px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .role-tab {
-            flex: 1;
-            padding: 0.5rem;
-            text-align: center;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .role-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border 0.3s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: var(--secondary);
-        }
-        
-        .btn-block {
-            display: block;
-            width: 100%;
-        }
-        
-        .auth-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-        
-        .auth-toggle {
-            color: var(--primary);
-            background: none;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* App Styles */
-        .app-container {
-            display: none;
-        }
-        
-        header {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1.25rem;
-        }
-        
-        .logo-icon {
-            color: var(--primary);
-            font-size: 1.5rem;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .user-avatar {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-        }
-        
-        .student-avatar {
-            background: var(--student);
-        }
-        
-        .admin-avatar {
-            background: var(--admin);
-        }
-        
-        .nav-tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            overflow-x: auto;
-        }
-        
-        .nav-tab {
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-            white-space: nowrap;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .nav-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 1.5rem 0;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        
-        .stat-info h3 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-        
-        .stat-info p {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-        
-        .stat-icon {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        
-        .icon-primary {
-            background: #dbeafe;
-            color: var(--primary);
-        }
-        
-        .icon-warning {
-            background: #fef3c7;
-            color: var(--warning);
-        }
-        
-        .icon-success {
-            background: #d1fae5;
-            color: var(--success);
-        }
-        
-        .icon-danger {
-            background: #fee2e2;
-            color: var(--danger);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        th {
-            background: #f8fafc;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-        
-        tr:hover {
-            background: #f8fafc;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-approved {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status-revisions {
-            background: #ffedd5;
-            color: #9a3412;
-        }
-        
-        .status-disapproved {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .action-btn {
-            background: none;
-            border: none;
-            color: var(--primary);
-            cursor: pointer;
-            font-weight: 500;
-            margin-right: 1rem;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .btn-secondary {
-            background: #e2e8f0;
-            color: var(--dark);
-        }
-        
-        .btn-secondary:hover {
-            background: #cbd5e1;
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .detail-item h4 {
-            font-size: 0.9rem;
-            color: var(--gray);
-            margin-bottom: 0.5rem;
-        }
-        
-        .detail-item p {
-            font-weight: 500;
-        }
-        
-        .comments-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e2e8f0;
-        }
-        
-        .comment {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        
-        .comment-author {
-            font-weight: 600;
-        }
-        
-        .comment-date {
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-        
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: var(--success);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            z-index: 1001;
-            transform: translateX(150%);
-            transition: transform 0.3s;
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .form-grid, .details-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .nav-tabs {
-                font-size: 0.9rem;
-            }
-            
-            .nav-tab {
-                padding: 1rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .auth-card {
-                padding: 1.5rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Approval System</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <!-- Authentication Section -->
-    <div id="authSection" class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <div class="auth-icon">🏛️</div>
-                <h1 class="auth-title">Project Approval System</h1>
-                <p class="auth-subtitle">Student Activities and Leadership Development</p>
-            </div>
-            
-            <div class="role-tabs">
-                <div class="role-tab active" data-role="student">Student</div>
-                <div class="role-tab" data-role="admin">Admin</div>
-            </div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email Address</label>
-                    <input type="email" id="loginEmail" required placeholder="your.email@example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" required placeholder="Enter your password">
-                </div>
-                
-                <button type="submit" class="btn btn-block">Sign In</button>
-            </form>
-            
-            <form id="registerForm" style="display: none;">
-                <div class="form-group">
-                    <label for="registerName">Full Name</label>
-                    <input type="text" id="registerName" required placeholder="John Doe">
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerEmail">Email Address</label>
-                    <input type="email" id="registerEmail" required placeholder="your.email@example.com">
-                </div>
-                
-                <div class="form-group student-field">
-                    <label for="registerStudentId">Student ID</label>
-                    <input type="text" id="registerStudentId" placeholder="20234824932">
-                </div>
-                
-                <div class="form-group student-field">
-                    <label for="registerOrganization">Organization</label>
-                    <select id="registerOrganization">
-                        <option value="">Select your organization</option>
-                        <option value="Rotaract Club">Rotaract Club</option>
-                        <option value="Student Council">Student Council</option>
-                        <option value="Computer Science Society">Computer Science Society</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" required placeholder="Create a password">
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerConfirmPassword">Confirm Password</label>
-                    <input type="password" id="registerConfirmPassword" required placeholder="Confirm your password">
-                </div>
-                
-                <button type="submit" class="btn btn-block">Create Account</button>
-            </form>
-            
-            <div class="auth-footer">
-                <p id="authToggleText">Don't have an account? <button class="auth-toggle" id="authToggleBtn">Sign up</button></p>
-            </div>
+  <!-- Authentication Section -->
+  <div id="authSection" class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-icon">🏛️</div>
+        <h1 class="auth-title">Project Approval System</h1>
+        <p class="auth-subtitle">Student Activities and Leadership Development</p>
+      </div>
+      <div class="role-tabs">
+        <div class="role-tab active" data-role="student">Student</div>
+        <div class="role-tab" data-role="admin">Admin</div>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" required placeholder="your.email@example.com" />
         </div>
-    </div>
-    
-    <!-- Application Section -->
-    <div id="appSection" class="app-container">
-        <header>
-            <div class="container">
-                <div class="header-content">
-                    <div class="logo">
-                        <span class="logo-icon">🏛️</span>
-                        <span>Project Approval System</span>
-                    </div>
-                    
-                    <div class="user-info">
-                        <span id="userName">Jane Smith (Student)</span>
-                        <div id="userAvatar" class="user-avatar student-avatar">JS</div>
-                        <button id="logoutBtn" class="action-btn">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
-        <nav class="nav-tabs">
-            <div class="container">
-                <div id="studentNav">
-                    <div class="nav-tab active" data-tab="student-dashboard">My Dashboard</div>
-                    <div class="nav-tab" data-tab="student-submit">Submit Project</div>
-                    <div class="nav-tab" data-tab="student-submissions">My Submissions</div>
-                </div>
-                
-                <div id="adminNav" style="display: none;">
-                    <div class="nav-tab active" data-tab="admin-dashboard">Review Dashboard</div>
-                    <div class="nav-tab" data-tab="admin-submissions">All Submissions</div>
-                    <div class="nav-tab" data-tab="admin-users">User Management</div>
-                </div>
-            </div>
-        </nav>
-        
-        <main class="container">
-            <!-- Student Dashboard -->
-            <div id="student-dashboard" class="tab-content active">
-                <h2 class="section-title">My Project Dashboard</h2>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>5</h3>
-                            <p>My Submissions</p>
-                        </div>
-                        <div class="stat-icon icon-primary">📄</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>2</h3>
-                            <p>Pending Review</p>
-                        </div>
-                        <div class="stat-icon icon-warning">⏱️</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>3</h3>
-                            <p>Approved</p>
-                        </div>
-                        <div class="stat-icon icon-success">✅</div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Recent Activity</h3>
-                    <div style="margin-top: 1rem;">
-                        <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
-                            <div style="background: #dbeafe; padding: 0.5rem; border-radius: 50%;">💬</div>
-                            <div>
-                                <p>Dr. Reyes added a comment to your "Annual Charity Run 2025" proposal</p>
-                                <p style="font-size: 0.9rem; color: var(--gray); margin-top: 0.25rem;">2 hours ago</p>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
-                            <div style="background: #d1fae5; padding: 0.5rem; border-radius: 50%;">✅</div>
-                            <div>
-                                <p>Your "Leadership Seminar" proposal was approved</p>
-                                <p style="font-size: 0.9rem; color: var(--gray); margin-top: 0.25rem;">1 day ago</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Student Submit Form -->
-            <div id="student-submit" class="tab-content">
-                <h2 class="section-title">Submit New Project Proposal</h2>
-                
-                <div class="card">
-                    <form id="submissionForm">
-                        <div class="form-group">
-                            <label for="title">Project Title *</label>
-                            <input type="text" id="title" name="title" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="organization">Organization *</label>
-                            <select id="organization" name="organization" required>
-                                <option value="">Select your organization</option>
-                                <option value="Rotaract Club">Rotaract Club</option>
-                                <option value="Student Council">Student Council</option>
-                                <option value="Computer Science Society">Computer Science Society</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="objectives">Objectives *</label>
-                            <textarea id="objectives" name="objectives" required rows="3"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="description">Project Description</label>
-                            <textarea id="description" name="description" rows="4"></textarea>
-                        </div>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="budget">Budget (₱) *</label>
-                                <input type="number" id="budget" name="budget" step="0.01" min="0" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="venue">Venue *</label>
-                                <input type="text" id="venue" name="venue" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="dateOfActivity">Date of Activity *</label>
-                            <input type="date" id="dateOfActivity" name="dateOfActivity" required>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="button" id="cancelSubmission" class="btn btn-secondary">Cancel</button>
-                            <button type="submit" class="btn">Submit Proposal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Student Submissions -->
-            <div id="student-submissions" class="tab-content">
-                <h2 class="section-title">My Project Submissions</h2>
-                
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Organization</th>
-                                <th>Date Submitted</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentSubmissionsTableBody">
-                            <!-- Student submissions will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Admin Dashboard -->
-            <div id="admin-dashboard" class="tab-content">
-                <h2 class="section-title">Review Dashboard</h2>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>24</h3>
-                            <p>Total Submissions</p>
-                        </div>
-                        <div class="stat-icon icon-primary">📄</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>8</h3>
-                            <p>Pending Review</p>
-                        </div>
-                        <div class="stat-icon icon-warning">⏱️</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>12</h3>
-                            <p>Approved</p>
-                        </div>
-                        <div class="stat-icon icon-success">✅</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <h3>4</h3>
-                            <p>Needs Revision</p>
-                        </div>
-                        <div class="stat-icon icon-danger">⚠️</div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3>Pending Reviews</h3>
-                        <a href="#" style="color: var(--primary); font-weight: 500;">View All</a>
-                    </div>
-                    
-                    <div id="pendingReviewsList">
-                        <!-- Pending reviews will be populated here -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Admin Submissions -->
-            <div id="admin-submissions" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2 class="section-title">All Project Submissions</h2>
-                    <select id="adminOrganizationFilter">
-                        <option value="">All Organizations</option>
-                        <option value="Rotaract Club">Rotaract Club</option>
-                        <option value="Student Council">Student Council</option>
-                        <option value="Computer Science Society">Computer Science Society</option>
-                    </select>
-                </div>
-                
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Organization</th>
-                                <th>Submitted By</th>
-                                <th>Date Submitted</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminSubmissionsTableBody">
-                            <!-- Admin submissions will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Admin User Management -->
-            <div id="admin-users" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2 class="section-title">User Management</h2>
-                    <button class="btn">Add User</button>
-                </div>
-                
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Organization</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <div class="user-avatar student-avatar">JS</div>
-                                        <div>
-                                            <div>Jane Smith</div>
-                                            <div style="font-size: 0.8rem; color: var(--gray);">jane.smith@student.xu.edu.ph</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-pending">Student</span></td>
-                                <td>Rotaract Club</td>
-                                <td><span class="status-badge status-approved">Active</span></td>
-                                <td>
-                                    <button class="action-btn">Edit</button>
-                                    <button class="action-btn" style="color: var(--danger);">Deactivate</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <!-- View Submission Modal -->
-    <div id="viewSubmissionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Project Proposal Details</h3>
-                <button class="modal-close" id="closeViewModal">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <h4>Project Title</h4>
-                        <p id="viewTitle">Annual Charity Run 2025</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Organization</h4>
-                        <p id="viewOrganization">Rotaract Club</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Submitted By</h4>
-                        <p id="viewSubmittedBy">Jane Smith</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Objectives</h4>
-                        <p id="viewObjectives">Raise funds for local orphanage</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Budget</h4>
-                        <p id="viewBudget">₱15,000.00</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Venue</h4>
-                        <p id="viewVenue">University Oval</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Date of Activity</h4>
-                        <p id="viewDateOfActivity">December 10, 2025</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Date Submitted</h4>
-                        <p id="viewDateSubmitted">November 13, 2025</p>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <h4>Status</h4>
-                        <p id="viewStatus"><span class="status-badge status-pending">Pending</span></p>
-                    </div>
-                </div>
-                
-                <div class="comments-section">
-                    <h4>Comments</h4>
-                    <div id="commentsContainer">
-                        <!-- Comments will be populated here -->
-                    </div>
-                    
-                    <div id="adminCommentForm" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
-                        <h5>Update Status & Add Comment</h5>
-                        <form id="updateStatusForm" style="margin-top: 1rem;">
-                            <div class="form-group">
-                                <label for="statusUpdate">Status *</label>
-                                <select id="statusUpdate" name="status" required>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Revisions">Revisions</option>
-                                    <option value="Disapproved">Disapproved</option>
-                                    <option value="Comments Added">Comments Added</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="commentText">Comment</label>
-                                <textarea id="commentText" name="comment" rows="3"></textarea>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="submit" class="btn">Update Status</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required placeholder="Enter your password" />
         </div>
+        <button type="submit" class="btn btn-block">Sign In</button>
+      </form>
+      <form id="registerForm" style="display: none;">
+        <div class="form-group">
+          <label for="registerName">Full Name</label>
+          <input type="text" id="registerName" required placeholder="John Doe" />
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email Address</label>
+          <input type="email" id="registerEmail" required placeholder="your.email@example.com" />
+        </div>
+        <div class="form-group student-field">
+          <label for="registerStudentId">Student ID</label>
+          <input type="text" id="registerStudentId" placeholder="20234824932" />
+        </div>
+        <div class="form-group student-field">
+          <label for="registerOrganization">Organization</label>
+          <select id="registerOrganization">
+            <option value="">Select your organization</option>
+            <option value="Rotaract Club">Rotaract Club</option>
+            <option value="Student Council">Student Council</option>
+            <option value="Computer Science Society">Computer Science Society</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input type="password" id="registerPassword" required placeholder="Create a password" />
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Confirm Password</label>
+          <input type="password" id="registerConfirmPassword" required placeholder="Confirm your password" />
+        </div>
+        <button type="submit" class="btn btn-block">Create Account</button>
+      </form>
+      <div class="auth-footer">
+        <p id="authToggleText">Don't have an account? <button class="auth-toggle" id="authToggleBtn">Sign up</button></p>
+      </div>
     </div>
-    
-    <!-- Success Notification -->
-    <div id="successNotification" class="notification">
-        <span>✅</span>
-        <span id="successMessage">Operation completed successfully!</span>
+  </div>
+
+  <!-- Application Section -->
+  <div id="appSection" class="app-container">
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <span class="logo-icon">🏛️</span>
+            <span>Project Approval System</span>
+          </div>
+          <div class="user-info">
+            <span id="userName">User Name</span>
+            <div id="userAvatar" class="user-avatar"></div>
+            <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <nav class="nav-tabs">
+      <div class="container">
+        <div id="studentNav" style="display: none;">
+          <div class="nav-tab active" data-tab="student-dashboard">My Dashboard</div>
+          <div class="nav-tab" data-tab="student-submit">Submit Project</div>
+          <div class="nav-tab" data-tab="student-submissions">My Submissions</div>
+        </div>
+        <div id="adminNav" style="display: none;">
+          <div class="nav-tab active" data-tab="admin-dashboard">Review Dashboard</div>
+          <div class="nav-tab" data-tab="admin-submissions">All Submissions</div>
+          <div class="nav-tab" data-tab="admin-users">User Management</div>
+        </div>
+      </div>
+    </nav>
+    <main class="container">
+      <!-- Student Dashboard -->
+      <div id="student-dashboard" class="tab-content">
+        <h2 class="section-title">My Project Dashboard</h2>
+        <div class="stats-grid" id="studentStats"></div>
+      </div>
+
+      <!-- Student Submit -->
+      <div id="student-submit" class="tab-content">
+        <h2 class="section-title">Submit New Project Proposal</h2>
+        <div class="card">
+          <form id="submissionForm">
+            <div class="form-group">
+              <label for="title">Project Title *</label>
+              <input type="text" id="title" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="organization">Organization *</label>
+              <select id="organization" name="organization" required>
+                <option value="">Select your organization</option>
+                <option value="Rotaract Club">Rotaract Club</option>
+                <option value="Student Council">Student Council</option>
+                <option value="Computer Science Society">Computer Science Society</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="objectives">Objectives *</label>
+              <textarea id="objectives" name="objectives" required rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="description">Project Description</label>
+              <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="budget">Budget (₱) *</label>
+                <input type="number" id="budget" name="budget" step="0.01" min="0" required />
+              </div>
+              <div class="form-group">
+                <label for="venue">Venue *</label>
+                <input type="text" id="venue" name="venue" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="dateOfActivity">Date of Activity *</label>
+              <input type="date" id="dateOfActivity" name="dateOfActivity" required />
+            </div>
+            <div class="form-actions">
+              <button type="button" id="cancelSubmission" class="btn btn-secondary">Cancel</button>
+              <button type="submit" class="btn">Submit Proposal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Student Submissions -->
+      <div id="student-submissions" class="tab-content">
+        <h2 class="section-title">My Project Submissions</h2>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Organization</th>
+                <th>Date Submitted</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentSubmissionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admin Dashboard -->
+      <div id="admin-dashboard" class="tab-content">
+        <h2 class="section-title">Review Dashboard</h2>
+        <div class="quick-actions">
+          <button class="quick-action-btn" id="quickReviewBtn">
+            <span>⚡</span>
+            Quick Review
+          </button>
+          <button class="quick-action-btn" id="exportReportsBtn">
+            <span>📊</span>
+            Export Reports
+          </button>
+          <button class="quick-action-btn" id="manageTemplatesBtn">
+            <span>📝</span>
+            Manage Templates
+          </button>
+        </div>
+        
+        <!-- Status Filters -->
+        <div class="status-filters" id="dashboardStatusFilters">
+          <button class="status-filter active" data-status="all">All</button>
+          <button class="status-filter" data-status="pending">Pending</button>
+          <button class="status-filter" data-status="approved">Approved</button>
+          <button class="status-filter" data-status="revisions">Revisions</button>
+          <button class="status-filter" data-status="disapproved">Disapproved</button>
+        </div>
+
+        <!-- Project Submissions List -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>Project Submissions</h3>
+            <div style="font-size: 0.9rem; color: var(--gray);">
+              Showing: <span id="currentFilterDisplay">All Submissions</span>
+            </div>
+          </div>
+          <div id="pendingReviewsList"></div>
+        </div>
+      </div>
+
+      <!-- Admin Submissions -->
+      <div id="admin-submissions" class="tab-content">
+        <div class="table-actions">
+          <div class="filter-controls">
+            <select id="adminOrganizationFilter">
+              <option value="">All Organizations</option>
+              <option value="Rotaract Club">Rotaract Club</option>
+              <option value="Student Council">Student Council</option>
+              <option value="Computer Science Society">Computer Science Society</option>
+            </select>
+            <select id="adminStatusFilter">
+              <option value="">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Revisions">Revisions</option>
+              <option value="Disapproved">Disapproved</option>
+            </select>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-export" id="exportSubmissionsBtn">Export CSV</button>
+            <button class="btn btn-print" id="printSubmissionsBtn">Print</button>
+          </div>
+        </div>
+        <h2 class="section-title">All Project Submissions</h2>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Organization</th>
+                <th>Submitted By</th>
+                <th>Date Submitted</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminSubmissionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Admin Users -->
+      <div id="admin-users" class="tab-content">
+        <div class="table-actions">
+          <h2 class="section-title">User Management</h2>
+          <div class="action-buttons">
+            <button class="btn" id="addUserBtn">Add User</button>
+            <button class="btn btn-export" id="exportUsersBtn">Export Users</button>
+          </div>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Organization</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="userManagementTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div id="viewSubmissionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Project Proposal Details</h3>
+        <button class="modal-close" id="closeViewModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="details-grid">
+          <div class="detail-item">
+            <h4>Project Title</h4>
+            <p id="viewTitle">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Organization</h4>
+            <p id="viewOrganization">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Submitted By</h4>
+            <p id="viewSubmittedBy">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Status</h4>
+            <p id="viewStatus">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Objectives</h4>
+            <p id="viewObjectives">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Budget</h4>
+            <p id="viewBudget">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Venue</h4>
+            <p id="viewVenue">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Date of Activity</h4>
+            <p id="viewDateOfActivity">-</p>
+          </div>
+          <div class="detail-item" style="grid-column: 1 / -1;">
+            <h4>Description</h4>
+            <p id="viewDescription">-</p>
+          </div>
+          <div class="detail-item">
+            <h4>Date Submitted</h4>
+            <p id="viewDateSubmitted">-</p>
+          </div>
+        </div>
+        <div class="comments-section">
+          <h4>Comments</h4>
+          <div id="commentsContainer"></div>
+          <form id="updateStatusForm" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+            <h5>Update Status & Add Comment</h5>
+            <div class="form-group">
+              <label for="statusUpdate">Status *</label>
+              <select id="statusUpdate" name="status" required>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Revisions">Revisions</option>
+                <option value="Disapproved">Disapproved</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="commentText">Comment</label>
+              <textarea id="commentText" name="comment" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn">Update Status</button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-actions" id="modalActions">
+          <button class="btn btn-secondary" id="printProposalBtn">Print Proposal</button>
+          <button class="btn btn-success" id="approveBtn">Approve</button>
+          <button class="btn btn-warning" id="requestRevisionsBtn">Request Revisions</button>
+          <button class="btn btn-danger" id="disapproveBtn">Disapprove</button>
+        </div>
+      </div>
     </div>
-    
-    <script>
-        // Sample data
-        const users = [
-            { id: 1, name: "Jane Smith", email: "student@example.com", password: "password123", role: "student", studentId: "2023-12345", organization: "Rotaract Club", avatar: "JS" },
-            { id: 2, name: "Dr. Reyes", email: "admin@example.com", password: "admin123", role: "admin", avatar: "DR" }
-        ];
-        
-        const sampleSubmissions = [
-            {
-                id: "60d21b4667d0d8992e610c85",
-                title: "Annual Charity Run 2025",
-                organization: "Rotaract Club",
-                submittedBy: "Jane Smith",
-                dateSubmitted: "2025-11-13T08:00:00Z",
-                status: "Pending",
-                objectives: "Raise funds for local orphanage",
-                budget: 15000,
-                venue: "University Oval",
-                dateOfActivity: "2025-12-10",
-                description: "A 5K fun run open to all students",
-                comments: []
-            },
-            {
-                id: "60d21b4667d0d8992e610c86",
-                title: "Leadership Seminar",
-                organization: "Student Council",
-                submittedBy: "John Doe",
-                dateSubmitted: "2025-11-10T10:30:00Z",
-                status: "Approved",
-                objectives: "Develop leadership skills among student officers",
-                budget: 8000,
-                venue: "University Auditorium",
-                dateOfActivity: "2025-12-05",
-                description: "One-day seminar with guest speakers",
-                comments: [
-                    { author: "Dr. Reyes", text: "Great initiative! Approved with minor budget adjustments.", timestamp: "2025-11-12T14:20:00Z" }
-                ]
-            }
-        ];
-        
-        // DOM elements
-        const authSection = document.getElementById('authSection');
-        const appSection = document.getElementById('appSection');
-        const roleTabs = document.querySelectorAll('.role-tab');
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        const authToggleBtn = document.getElementById('authToggleBtn');
-        const authToggleText = document.getElementById('authToggleText');
-        const studentFields = document.querySelectorAll('.student-field');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const studentNav = document.getElementById('studentNav');
-        const adminNav = document.getElementById('adminNav');
-        const navTabs = document.querySelectorAll('.nav-tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const submissionForm = document.getElementById('submissionForm');
-        const cancelSubmission = document.getElementById('cancelSubmission');
-        const studentSubmissionsTableBody = document.getElementById('studentSubmissionsTableBody');
-        const adminSubmissionsTableBody = document.getElementById('adminSubmissionsTableBody');
-        const pendingReviewsList = document.getElementById('pendingReviewsList');
-        const viewSubmissionModal = document.getElementById('viewSubmissionModal');
-        const closeViewModal = document.getElementById('closeViewModal');
-        const updateStatusForm = document.getElementById('updateStatusForm');
-        const adminCommentForm = document.getElementById('adminCommentForm');
-        const successNotification = document.getElementById('successNotification');
-        
-        // State
-        let currentUser = null;
-        let currentRole = 'student';
-        let isLoginMode = true;
-        
-        // Initialize
-        function init() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showApp();
-            }
-            
-            setupEventListeners();
-            renderStudentSubmissions();
-            renderAdminSubmissions();
-            renderPendingReviews();
-        }
-        
-        // Event listeners
-        function setupEventListeners() {
-            // Auth role tabs
-            roleTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    roleTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    currentRole = tab.dataset.role;
-                    
-                    // Show/hide student fields
-                    studentFields.forEach(field => {
-                        field.style.display = currentRole === 'student' ? 'block' : 'none';
-                    });
-                });
-            });
-            
-            // Auth form toggle
-            authToggleBtn.addEventListener('click', toggleAuthMode);
-            
-            // Login form
-            loginForm.addEventListener('submit', handleLogin);
-            
-            // Registration form
-            registerForm.addEventListener('submit', handleRegistration);
-            
-            // Logout
-            logoutBtn.addEventListener('click', handleLogout);
-            
-            // Navigation tabs
-            navTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetTab = tab.dataset.tab;
-                    
-                    // Update active tab
-                    navTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Show target content
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    document.getElementById(targetTab).classList.add('active');
-                });
-            });
-            
-            // Submission form
-            submissionForm.addEventListener('submit', handleNewSubmission);
-            cancelSubmission.addEventListener('click', () => submissionForm.reset());
-            
-            // Modal
-            closeViewModal.addEventListener('click', () => viewSubmissionModal.style.display = 'none');
-            
-            // Status update form
-            updateStatusForm.addEventListener('submit', handleStatusUpdate);
-        }
-        
-        // Auth mode toggle
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            
-            if (isLoginMode) {
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
-                authToggleText.innerHTML = 'Don\'t have an account? <button class="auth-toggle" id="authToggleBtn">Sign up</button>';
-            } else {
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-                authToggleText.innerHTML = 'Already have an account? <button class="auth-toggle" id="authToggleBtn">Sign in</button>';
-            }
-            
-            // Re-attach event listener
-            document.getElementById('authToggleBtn').addEventListener('click', toggleAuthMode);
-        }
-        
-        // Handle login
-        function handleLogin(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            const user = users.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                showApp();
-                showSuccess('Login successful!');
-            } else {
-                alert('Invalid email or password');
-            }
-        }
-        
-        // Handle registration
-        function handleRegistration(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            const studentId = document.getElementById('registerStudentId').value;
-            const organization = document.getElementById('registerOrganization').value;
-            
-            if (password !== confirmPassword) {
-                alert('Passwords do not match');
-                return;
-            }
-            
-            if (users.find(u => u.email === email)) {
-                alert('An account with this email already exists');
-                return;
-            }
-            
-            const newUser = {
-                id: users.length + 1,
-                name,
-                email,
-                password,
-                role: currentRole,
-                avatar: name.split(' ').map(n => n[0]).join('').toUpperCase()
-            };
-            
-            if (currentRole === 'student') {
-                newUser.studentId = studentId;
-                newUser.organization = organization;
-            }
-            
-            users.push(newUser);
-            currentUser = newUser;
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
-            
-            showApp();
-            showSuccess('Account created successfully!');
-        }
-        
-        // Handle logout
-        function handleLogout() {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            showAuth();
-            loginForm.reset();
-            registerForm.reset();
-        }
-        
-        // Show auth section
-        function showAuth() {
-            authSection.style.display = 'flex';
-            appSection.style.display = 'none';
-        }
-        
-        // Show app section
-        function showApp() {
-            authSection.style.display = 'none';
-            appSection.style.display = 'block';
-            
-            if (currentUser) {
-                userName.textContent = `${currentUser.name} (${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)})`;
-                userAvatar.textContent = currentUser.avatar;
-                
-                if (currentUser.role === 'student') {
-                    userAvatar.className = 'user-avatar student-avatar';
-                    studentNav.style.display = 'flex';
-                    adminNav.style.display = 'none';
-                } else {
-                    userAvatar.className = 'user-avatar admin-avatar';
-                    studentNav.style.display = 'none';
-                    adminNav.style.display = 'flex';
-                    adminCommentForm.style.display = 'block';
-                }
-            }
-        }
-        
-        // Handle new submission
-        function handleNewSubmission(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const newSubmission = {
-                id: 'temp-' + Date.now(),
-                title: formData.get('title'),
-                organization: formData.get('organization'),
-                submittedBy: currentUser.name,
-                objectives: formData.get('objectives'),
-                description: formData.get('description'),
-                budget: parseFloat(formData.get('budget')),
-                venue: formData.get('venue'),
-                dateOfActivity: formData.get('dateOfActivity'),
-                dateSubmitted: new Date().toISOString(),
-                status: 'Pending',
-                comments: []
-            };
-            
-            sampleSubmissions.unshift(newSubmission);
-            submissionForm.reset();
-            
-            renderStudentSubmissions();
-            renderAdminSubmissions();
-            renderPendingReviews();
-            
-            // Navigate to submissions view
-            navTabs.forEach(t => t.classList.remove('active'));
-            document.querySelector('[data-tab="student-submissions"]').classList.add('active');
-            
-            tabContents.forEach(content => content.classList.remove('active'));
-            document.getElementById('student-submissions').classList.add('active');
-            
-            showSuccess('Project proposal submitted successfully!');
-        }
-        
-        // Render student submissions
-        function renderStudentSubmissions() {
-            if (!studentSubmissionsTableBody) return;
-            
-            studentSubmissionsTableBody.innerHTML = '';
-            
-            const studentSubmissions = sampleSubmissions.filter(sub => 
-                sub.submittedBy === currentUser.name
-            );
-            
-            if (studentSubmissions.length === 0) {
-                studentSubmissionsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem; color: var(--gray);">
-                            No submissions found
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            studentSubmissions.forEach(submission => {
-                const submittedDate = new Date(submission.dateSubmitted);
-                const formattedDate = submittedDate.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                
-                const statusClass = `status-badge status-${submission.status.toLowerCase().replace(' ', '-')}`;
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${submission.title}</td>
-                    <td>${submission.organization}</td>
-                    <td>${formattedDate}</td>
-                    <td><span class="${statusClass}">${submission.status}</span></td>
-                    <td>
-                        <button class="action-btn view-submission" data-id="${submission.id}">View</button>
-                    </td>
-                `;
-                
-                studentSubmissionsTableBody.appendChild(row);
-            });
-            
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-submission').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.dataset.id;
-                    viewSubmission(id);
-                });
-            });
-        }
-        
-        // Render admin submissions
-        function renderAdminSubmissions() {
-            if (!adminSubmissionsTableBody) return;
-            
-            adminSubmissionsTableBody.innerHTML = '';
-            
-            if (sampleSubmissions.length === 0) {
-                adminSubmissionsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--gray);">
-                            No submissions found
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            sampleSubmissions.forEach(submission => {
-                const submittedDate = new Date(submission.dateSubmitted);
-                const formattedDate = submittedDate.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                
-                const statusClass = `status-badge status-${submission.status.toLowerCase().replace(' ', '-')}`;
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${submission.title}</td>
-                    <td>${submission.organization}</td>
-                    <td>${submission.submittedBy}</td>
-                    <td>${formattedDate}</td>
-                    <td><span class="${statusClass}">${submission.status}</span></td>
-                    <td>
-                        <button class="action-btn view-submission" data-id="${submission.id}">Review</button>
-                    </td>
-                `;
-                
-                adminSubmissionsTableBody.appendChild(row);
-            });
-            
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-submission').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.dataset.id;
-                    viewSubmission(id);
-                });
-            });
-        }
-        
-        // Render pending reviews
-        function renderPendingReviews() {
-            if (!pendingReviewsList) return;
-            
-            pendingReviewsList.innerHTML = '';
-            
-            const pendingSubmissions = sampleSubmissions.filter(sub => sub.status === 'Pending');
-            
-            if (pendingSubmissions.length === 0) {
-                pendingReviewsList.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--gray);">
-                        No pending reviews
-                    </div>
-                `;
-                return;
-            }
-            
-            pendingSubmissions.forEach(submission => {
-                const submittedDate = new Date(submission.dateSubmitted);
-                const formattedDate = submittedDate.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                });
-                
-                const reviewItem = document.createElement('div');
-                reviewItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem;';
-                reviewItem.innerHTML = `
-                    <div>
-                        <div style="font-weight: 600;">${submission.title}</div>
-                        <div style="font-size: 0.9rem; color: var(--gray);">${submission.organization} • ${formattedDate}</div>
-                    </div>
-                    <button class="btn view-submission" data-id="${submission.id}">Review</button>
-                `;
-                
-                pendingReviewsList.appendChild(reviewItem);
-            });
-            
-            // Add event listeners to review buttons
-            document.querySelectorAll('.view-submission').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const id = e.target.dataset.id;
-                    viewSubmission(id);
-                });
-            });
-        }
-        
-        // View submission details
-        function viewSubmission(id) {
-            const submission = sampleSubmissions.find(sub => sub.id === id);
-            if (!submission) return;
-            
-            // Populate modal
-            document.getElementById('viewTitle').textContent = submission.title;
-            document.getElementById('viewOrganization').textContent = submission.organization;
-            document.getElementById('viewSubmittedBy').textContent = submission.submittedBy;
-            document.getElementById('viewObjectives').textContent = submission.objectives;
-            document.getElementById('viewDescription').textContent = submission.description || 'No description provided';
-            document.getElementById('viewBudget').textContent = `₱${submission.budget.toLocaleString()}`;
-            document.getElementById('viewVenue').textContent = submission.venue;
-            
-            // Format dates
-            const activityDate = new Date(submission.dateOfActivity);
-            document.getElementById('viewDateOfActivity').textContent = activityDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            const submittedDate = new Date(submission.dateSubmitted);
-            document.getElementById('viewDateSubmitted').textContent = submittedDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            // Status
-            const statusElement = document.getElementById('viewStatus');
-            statusElement.innerHTML = '';
-            
-            const statusClass = `status-badge status-${submission.status.toLowerCase().replace(' ', '-')}`;
-            const statusBadge = document.createElement('span');
-            statusBadge.className = statusClass;
-            statusBadge.textContent = submission.status;
-            statusElement.appendChild(statusBadge);
-            
-            // Comments
-            const commentsContainer = document.getElementById('commentsContainer');
-            commentsContainer.innerHTML = '';
-            
-            if (submission.comments.length === 0) {
-                commentsContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--gray);">
-                        No comments yet
-                    </div>
-                `;
-            } else {
-                submission.comments.forEach(comment => {
-                    const commentDate = new Date(comment.timestamp);
-                    const formattedDate = commentDate.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    const commentElement = document.createElement('div');
-                    commentElement.className = 'comment';
-                    commentElement.innerHTML = `
-                        <div class="comment-header">
-                            <span class="comment-author">${comment.author}</span>
-                            <span class="comment-date">${formattedDate}</span>
-                        </div>
-                        <p>${comment.text}</p>
-                    `;
-                    commentsContainer.appendChild(commentElement);
-                });
-            }
-            
-            // Show modal
-            viewSubmissionModal.style.display = 'flex';
-        }
-        
-        // Handle status update
-        function handleStatusUpdate(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const status = formData.get('status');
-            const comment = formData.get('comment');
-            
-            // Find the submission being viewed (in a real app, this would use an ID)
-            const submissionTitle = document.getElementById('viewTitle').textContent;
-            const submissionIndex = sampleSubmissions.findIndex(sub => sub.title === submissionTitle);
-            
-            if (submissionIndex !== -1) {
-                sampleSubmissions[submissionIndex].status = status;
-                
-                if (comment.trim()) {
-                    sampleSubmissions[submissionIndex].comments.push({
-                        author: currentUser.name,
-                        text: comment,
-                        timestamp: new Date().toISOString()
-                    });
-                }
-                
-                // Re-render and update view
-                renderStudentSubmissions();
-                renderAdminSubmissions();
-                renderPendingReviews();
-                viewSubmission(sampleSubmissions[submissionIndex].id);
-                
-                // Reset form
-                updateStatusForm.reset();
-                
-                showSuccess('Status updated successfully!');
-            }
-        }
-        
-        // Show success notification
-        function showSuccess(message) {
-            document.getElementById('successMessage').textContent = message;
-            successNotification.classList.add('show');
-            
-            setTimeout(() => {
-                successNotification.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+  </div>
+
+  <!-- Notification -->
+  <div id="successNotification" class="notification">
+    <span>✅</span>
+    <span id="successMessage">Operation completed successfully!</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="reset.js"></script>
+  <script type="module" src="js/data.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/student.js"></script>
+  <script type="module" src="js/admin.js"></script>
 </body>
 </html>

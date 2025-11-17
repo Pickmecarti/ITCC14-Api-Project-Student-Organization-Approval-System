@@ -35,3 +35,12 @@ This week, our team will finalize the core functions and user roles for the Stud
 - [ ] Create and commit **models.py** with Pydantic/MongoDB models
 - [ ] Write and commit a basic **app.py** with one test endpoint
 - [ ] Update **README.md** with all agreed-upon sections
+
+### **Suggested Tech Stack Details**
+
+- **Backend**: Python + FastAPI
+- **Database**: MongoDB
+- **Version Control**: Git + GitHub
+- **Documentation**: OpenAPI (via FastAPI auto-docs)
+
+Milestone 2 (Nov Week 2): Half API + Half Documentation + Git/GitHub
