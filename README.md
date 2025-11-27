@@ -39,7 +39,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 2. In a new terminal, start the Streamlit frontend:
    ```
-   streamlit run app.py
+   streamlit run frontend.py
    ```
    This will open the frontend in your browser.
 
