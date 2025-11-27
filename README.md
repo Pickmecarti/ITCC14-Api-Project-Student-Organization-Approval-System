@@ -66,3 +66,17 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 - `app.py`: Streamlit frontend
 - `requirements.txt`: Python dependencies
 - `README.md`: This file
+
+
+MILESTONE 1: PROJECT INITIATION & PLANNING
+-   Define project and scope
+-   Gather initial requirements
+-   Research tools and feasibility
+-   Plan timeline and resources
+-   Outline system architecture
+
+MILESTONE 2: REQUIREMENTS & DESIGN
+-   Specify detailed requirements
+-   Define user roles (Student/Admin)
+-   Design system architecture and database
+-   Plan API endpoints and security
