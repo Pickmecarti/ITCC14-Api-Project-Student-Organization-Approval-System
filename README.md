@@ -1,4 +1,4 @@
-# Submission System
+# SOPAS (Student Organization Project Approval) 
 
 A simple submission system with roles (student/admin) built using FastAPI (backend) and Streamlit (frontend), with MongoDB for data storage.
 
