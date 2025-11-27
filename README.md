@@ -2,6 +2,12 @@
 
 A simple submission system with roles (student/admin) built using FastAPI (backend) and Streamlit (frontend), with MongoDB for data storage.
 
+# Team Members
+- Mariette Sai Joy S. Bacalso
+- Joshua Argel Detchaca
+- Florie Ann Madrono
+- Mary Angeli Talian
+
 ## Features
 
 - User authentication with roles (student/admin)
