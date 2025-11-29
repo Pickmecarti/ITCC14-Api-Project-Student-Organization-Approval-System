@@ -27,12 +27,12 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 3. Ensure MongoDB is running locally.
 
 - ### Running the Application
-  1. Start the FastAPI backend:
+1. Start the FastAPI backend:
    ```
    uvicorn main:app --reload
    ```
    This will start the backend on http://localhost:8000
-  2. In a new terminal, start the Streamlit frontend:
+2. In a new terminal, start the Streamlit frontend:
    ```
    streamlit run frontend.py
    ```
@@ -61,7 +61,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 ### MILESTONE 1: PROJECT INITIATION & PLANNING
 
-- **What you’ll do:**  
+- **What we'll do:**  
   - Define the overall project concept and scope.  
   - Gather initial functional and non-functional requirements.  
   - Research tools, frameworks, and assess feasibility.  
@@ -83,7 +83,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 ### MILESTONE 2: REQUIREMENTS & DESIGN
 
-- **What you’ll do:**
+- **What we'll do:**
   - Finalize detailed system requirements (functional & non-functional).  
   - Define user roles such as Student and Admin and their permissions.  
   - Design the complete system architecture (front-end, API, database, authentication flow).  
@@ -105,7 +105,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 ### MILESTONE 3: DEVELOPMENT
 
-- **What you’ll do:**  
+- **What we'll do:**  
   - Develop the backend API using FastAPI to handle core application logic and endpoints.  
   - Set up and integrate MongoDB for data storage and retrieval.  
   - Implement authentication using JWT to secure user access and sessions.  
@@ -127,7 +127,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 ### MILESTONE 4: TESTING
 
-- **What you’ll do:**
+- **What we'll do:**
   - Perform unit and integration testing on system components.  
   - Test authentication mechanisms, CRUD functionality, user roles, and database operations.  
   - Conduct error handling and edge case testing to ensure system stability.
@@ -144,7 +144,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 ### MILESTONE 5: DEPLOYMENT & DOCUMENTATION
 
-- **What you’ll do:**  
+- **What we'll do:**  
   - Deploy the system to a production environment and configure all required services and settings.  
   - Conduct final testing to ensure the system is stable, secure, and functioning as expected.  
   - Create complete user, API, and code documentation to support usage, maintenance, and future development.  
