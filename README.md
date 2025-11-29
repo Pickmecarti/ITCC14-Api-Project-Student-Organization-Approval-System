@@ -19,12 +19,12 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
   - MongoDB (running locally on default port 27017)
 
 - ### Installation
-  - 1. Clone or download the project files.
-  - 2. Install dependencies:
+1. Clone or download the project files.
+2. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
-  - 3. Ensure MongoDB is running locally.
+3. Ensure MongoDB is running locally.
 
 - ### Running the Application
   1. Start the FastAPI backend:
