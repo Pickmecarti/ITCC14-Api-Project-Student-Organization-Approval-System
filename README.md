@@ -39,10 +39,10 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
    This will open the frontend in your browser.
 
 - ### Usage
-  1. Register as a student or admin.
-  2. Login with your credentials.
-  3. Students: Create submissions, edit them if pending.
-  4. Admins: View all submissions, add comments, change status.
+1. Register as a student or admin.
+2. Login with your credentials.
+3. Students: Create submissions, edit them if pending.
+4. Admins: View all submissions, add comments, change status.
 
 - ### API Endpoints
   - POST /register: Register a new user
