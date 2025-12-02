@@ -28,6 +28,8 @@ def api_call(method, endpoint, data=None, headers=None):
         response = requests.post(url, data=json.dumps(data), headers=headers)
     elif method == 'PUT':
         response = requests.put(url, data=json.dumps(data), headers=headers)
+    elif method == 'DELETE':
+        response = requests.delete(url, headers=headers)
     return response
 
 # Login/Register
@@ -84,8 +86,14 @@ else:
         st.subheader("Create New Submission")
         title = st.text_input("Title")
         content = st.text_area("Content")
+        project_head = st.text_input("Project Head")
+        budget = st.number_input("Budget", min_value=0, step=1)
+        venue = st.text_input("Venue")
+        organization_name = st.text_input("Name of the Organization")
+        event_date = st.date_input("Event Date")
+        event_time = st.time_input("Event Time")
         if st.button("Submit"):
-            response = api_call('POST', '/submissions', {"title": title, "content": content})
+            response = api_call('POST', '/submissions', {"title": title, "content": content, "project_head": project_head, "budget": budget, "venue": venue, "organization_name": organization_name, "event_datetime": event_datetime})
             if response.status_code == 200:
                 st.success("Submission created!")
                 st.rerun()
@@ -98,7 +106,13 @@ else:
         submissions = response.json()
         for sub in submissions:
             with st.expander(f"{sub['title']} - {sub['status']}"):
+                st.write(f"Submitted by: {sub['student_id']}")
                 st.write(f"Content: {sub['content']}")
+                st.write(f"Project Head: {sub.get('project_head', 'N/A')}")
+                st.write(f"Budget: {sub.get('budget', 'N/A')}")
+                st.write(f"Venue: {sub.get('venue', 'N/A')}")
+                st.write(f"Organization Name: {sub.get('organization_name', 'N/A')}")
+                st.write(f"Event Date & Time: {sub.get('event_datetime', 'N/A')}")
                 st.write(f"Status: {sub['status']}")
                 if sub['comments']:
                     st.write("Comments:")
@@ -110,13 +124,40 @@ else:
                     with st.form(key=f"edit_{sub['_id']}"):
                         new_title = st.text_input("New Title", value=sub['title'])
                         new_content = st.text_area("New Content", value=sub['content'])
+                        new_project_head = st.text_input("New Project Head", value=sub.get('project_head', ''))
+                        new_budget = st.number_input("New Budget", min_value=0, step=1, value=int(sub.get('budget', 0)))
+                        new_venue = st.text_input("New Venue", value=sub.get('venue', ''))
+                        new_organization_name = st.text_input("New Name of the Organization", value=sub.get('organization_name', ''))
+                        # Parse existing datetime
+                        existing_datetime = sub.get('event_datetime', '')
+                        if existing_datetime:
+                            try:
+                                date_part, time_part = existing_datetime.split(' ')
+                                new_event_date = st.date_input("New Event Date", value=date_part)
+                                new_event_time = st.time_input("New Event Time", value=time_part)
+                            except:
+                                new_event_date = st.date_input("New Event Date")
+                                new_event_time = st.time_input("New Event Time")
+                        else:
+                            new_event_date = st.date_input("New Event Date")
+                            new_event_time = st.time_input("New Event Time")
                         if st.form_submit_button("Update"):
-                            edit_response = api_call('PUT', f"/submissions/{sub['_id']}", {"title": new_title, "content": new_content})
+                            edit_response = api_call('PUT', f"/submissions/{sub['_id']}", {"title": new_title, "content": new_content, "project_head": new_project_head, "budget": new_budget, "venue": new_venue, "organization_name": new_organization_name, "event_date": str(new_event_date), "event_time": str(new_event_time)})
                             if edit_response.status_code == 200:
                                 st.success("Updated!")
                                 st.rerun()
                             else:
                                 st.error("Update failed")
+
+                # Delete (students, pending only)
+                if st.session_state.role == "student" and sub['status'] == "pending" and sub['student_id'] == st.session_state.username:
+                    if st.button("Delete Submission", key=f"delete_{sub['_id']}"):
+                        delete_response = api_call('DELETE', f"/submissions/{sub['_id']}")
+                        if delete_response.status_code == 200:
+                            st.success("Deleted!")
+                            st.rerun()
+                        else:
+                            st.error("Delete failed")
 
                 # Admin functions
                 if st.session_state.role == "admin":

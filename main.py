@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -35,6 +36,12 @@ class LoginUser(BaseModel):
 class Submission(BaseModel):
     title: str
     content: str
+    project_head: str
+    budget: int
+    venue: str
+    organization_name: str
+    event_date: str
+    event_time: str
 
 class Comment(BaseModel):
     comment: str
@@ -101,6 +108,11 @@ async def create_submission(submission: Submission, current_user: str = Depends(
         "student_id": current_user,
         "title": submission.title,
         "content": submission.content,
+        "project_head": submission.project_head,
+        "budget": submission.budget,
+        "venue": submission.venue,
+        "organization_name": submission.organization_name,
+        "event_datetime": f"{submission.event_date} {submission.event_time}",
         "status": "pending",
         "comments": [],
         "created_at": datetime.utcnow()
@@ -122,12 +134,22 @@ async def get_submissions(current_user: str = Depends(get_current_user)):
 @app.put("/submissions/{submission_id}")
 async def update_submission(submission_id: str, submission: Submission, current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
-    db_submission = await db.submissions.find_one({"_id": submission_id, "student_id": current_user})
+    try:
+        oid = ObjectId(submission_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid submission ID")
+    db_submission = await db.submissions.find_one({"_id": oid, "student_id": current_user})
     if not db_submission:
         raise HTTPException(status_code=404, detail="Submission not found or not owned by user")
     if db_submission["status"] != "pending":
         raise HTTPException(status_code=400, detail="Cannot edit non-pending submission")
-    await db.submissions.update_one({"_id": submission_id}, {"$set": {"title": submission.title, "content": submission.content}})
+    await db.submissions.update_one({"_id": oid}, {"$set": {"title": submission.title,
+                                                            "content": submission.content,
+                                                            "project_head": submission.project_head,
+                                                            "budget": submission.budget,
+                                                            "venue": submission.venue,
+                                                            "organization_name": submission.organization_name,
+                                                            "event_datetime": f"{submission.event_date} {submission.event_time}"}})
     return {"message": "Submission updated"}
 
 @app.post("/submissions/{submission_id}/comment")
@@ -135,12 +157,16 @@ async def add_comment(submission_id: str, comment: Comment, current_user: str = 
     role = await get_user_role(current_user)
     if role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can add comments")
+    try:
+        oid = ObjectId(submission_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid submission ID")
     comment_dict = {
         "admin_id": current_user,
         "comment": comment.comment,
         "timestamp": datetime.utcnow()
     }
-    await db.submissions.update_one({"_id": submission_id}, {"$push": {"comments": comment_dict}})
+    await db.submissions.update_one({"_id": oid}, {"$push": {"comments": comment_dict}})
     return {"message": "Comment added"}
 
 @app.put("/submissions/{submission_id}/status")
@@ -150,8 +176,29 @@ async def update_status(submission_id: str, status_update: StatusUpdate, current
         raise HTTPException(status_code=403, detail="Only admins can update status")
     if status_update.status not in ["approved", "revision"]:
         raise HTTPException(status_code=400, detail="Invalid status")
-    await db.submissions.update_one({"_id": submission_id}, {"$set": {"status": status_update.status}})
+    try:
+        oid = ObjectId(submission_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid submission ID")
+    await db.submissions.update_one({"_id": oid}, {"$set": {"status": status_update.status}})
     return {"message": "Status updated"}
+
+@app.delete("/submissions/{submission_id}")
+async def delete_submission(submission_id: str, current_user: str = Depends(get_current_user)):
+    role = await get_user_role(current_user)
+    if role != "student":
+        raise HTTPException(status_code=403, detail="Only students can delete submissions")
+    try:
+        oid = ObjectId(submission_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid submission ID")
+    db_submission = await db.submissions.find_one({"_id": oid, "student_id": current_user})
+    if not db_submission:
+        raise HTTPException(status_code=404, detail="Submission not found or not owned by user")
+    if db_submission["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot delete non-pending submission")
+    await db.submissions.delete_one({"_id": oid})
+    return {"message": "Submission deleted"}
 
 @app.get("/me")
 async def get_me(current_user: str = Depends(get_current_user)):
