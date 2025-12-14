@@ -132,25 +132,41 @@ async def get_submissions(current_user: str = Depends(get_current_user)):
     return submissions
 
 @app.put("/submissions/{submission_id}")
-async def update_submission(submission_id: str, submission: Submission, current_user: str = Depends(get_current_user)):
+async def update_submission(
+    submission_id: str,
+    submission: Submission,
+    current_user: str = Depends(get_current_user)
+):
     role = await get_user_role(current_user)
+    if role != "student":
+        raise HTTPException(status_code=403, detail="Only students can update submissions")
+
     try:
         oid = ObjectId(submission_id)
     except:
         raise HTTPException(status_code=400, detail="Invalid submission ID")
-    db_submission = await db.submissions.find_one({"_id": oid, "student_id": current_user})
+
+    db_submission = await db.submissions.find_one(
+        {"_id": oid, "student_id": current_user}
+    )
     if not db_submission:
         raise HTTPException(status_code=404, detail="Submission not found or not owned by user")
-    if db_submission["status"] != "pending":
-        raise HTTPException(status_code=400, detail="Cannot edit non-pending submission")
-    await db.submissions.update_one({"_id": oid}, {"$set": {"title": submission.title,
-                                                            "content": submission.content,
-                                                            "project_head": submission.project_head,
-                                                            "budget": submission.budget,
-                                                            "venue": submission.venue,
-                                                            "organization_name": submission.organization_name,
-                                                            "event_datetime": f"{submission.event_date} {submission.event_time}"}})
+
+    await db.submissions.update_one(
+        {"_id": oid},
+        {"$set": {
+            "title": submission.title,
+            "content": submission.content,
+            "project_head": submission.project_head,
+            "budget": submission.budget,
+            "venue": submission.venue,
+            "organization_name": submission.organization_name,
+            "event_datetime": f"{submission.event_date} {submission.event_time}"
+        }}
+    )
+
     return {"message": "Submission updated"}
+
 
 @app.post("/submissions/{submission_id}/comment")
 async def add_comment(submission_id: str, comment: Comment, current_user: str = Depends(get_current_user)):
@@ -195,8 +211,6 @@ async def delete_submission(submission_id: str, current_user: str = Depends(get_
     db_submission = await db.submissions.find_one({"_id": oid, "student_id": current_user})
     if not db_submission:
         raise HTTPException(status_code=404, detail="Submission not found or not owned by user")
-    if db_submission["status"] != "pending":
-        raise HTTPException(status_code=400, detail="Cannot delete non-pending submission")
     await db.submissions.delete_one({"_id": oid})
     return {"message": "Submission deleted"}
 

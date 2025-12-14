@@ -1,11 +1,13 @@
 import streamlit as st
 import requests
 import json
+from datetime import datetime
+
 
 # Backend URL
 BACKEND_URL = "http://localhost:8000"
 
-st.title("Submission System")
+st.title("SOPAS")
 
 # Session state
 if 'token' not in st.session_state:
@@ -93,7 +95,7 @@ else:
         event_date = st.date_input("Event Date")
         event_time = st.time_input("Event Time")
         if st.button("Submit"):
-            response = api_call('POST', '/submissions', {"title": title, "content": content, "project_head": project_head, "budget": budget, "venue": venue, "organization_name": organization_name, "event_datetime": event_datetime})
+            response = api_call('POST', '/submissions', {"title": title, "content": content, "project_head": project_head, "budget": budget, "venue": venue, "organization_name": organization_name, "event_date": str(event_date), "event_time": str(event_time)})
             if response.status_code == 200:
                 st.success("Submission created!")
                 st.rerun()
@@ -119,8 +121,8 @@ else:
                     for comment in sub['comments']:
                         st.write(f"- {comment['comment']} (by {comment['admin_id']})")
 
-                # Edit (students, pending only)
-                if st.session_state.role == "student" and sub['status'] == "pending" and sub['student_id'] == st.session_state.username:
+                # Edit (students, all status)
+                if st.session_state.role == "student" and sub['student_id'] == st.session_state.username:
                     with st.form(key=f"edit_{sub['_id']}"):
                         new_title = st.text_input("New Title", value=sub['title'])
                         new_content = st.text_area("New Content", value=sub['content'])
@@ -128,9 +130,12 @@ else:
                         new_budget = st.number_input("New Budget", min_value=0, step=1, value=int(sub.get('budget', 0)))
                         new_venue = st.text_input("New Venue", value=sub.get('venue', ''))
                         new_organization_name = st.text_input("New Name of the Organization", value=sub.get('organization_name', ''))
+                        
                         # Parse existing datetime
                         existing_datetime = sub.get('event_datetime', '')
+
                         if existing_datetime:
+                            
                             try:
                                 date_part, time_part = existing_datetime.split(' ')
                                 new_event_date = st.date_input("New Event Date", value=date_part)
@@ -141,6 +146,8 @@ else:
                         else:
                             new_event_date = st.date_input("New Event Date")
                             new_event_time = st.time_input("New Event Time")
+
+
                         if st.form_submit_button("Update"):
                             edit_response = api_call('PUT', f"/submissions/{sub['_id']}", {"title": new_title, "content": new_content, "project_head": new_project_head, "budget": new_budget, "venue": new_venue, "organization_name": new_organization_name, "event_date": str(new_event_date), "event_time": str(new_event_time)})
                             if edit_response.status_code == 200:
@@ -149,8 +156,8 @@ else:
                             else:
                                 st.error("Update failed")
 
-                # Delete (students, pending only)
-                if st.session_state.role == "student" and sub['status'] == "pending" and sub['student_id'] == st.session_state.username:
+                # Delete (students only)
+                if st.session_state.role == "student" and sub['student_id'] == st.session_state.username:
                     if st.button("Delete Submission", key=f"delete_{sub['_id']}"):
                         delete_response = api_call('DELETE', f"/submissions/{sub['_id']}")
                         if delete_response.status_code == 200:
