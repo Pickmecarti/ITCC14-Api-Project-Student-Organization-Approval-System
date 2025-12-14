@@ -55,7 +55,7 @@ A simple submission system with roles (student/admin) built using FastAPI (backe
 
 - ### Files
   - `main.py`: FastAPI backend
-  - `app.py`: Streamlit frontend
+  - `frontend.py`: Streamlit frontend
   - `requirements.txt`: Python dependencies
   - `README.md`: This file
 
