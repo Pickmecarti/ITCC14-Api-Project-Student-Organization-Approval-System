@@ -1,87 +1,45 @@
+# Import necessary modules and models from models.py
 from fastapi import FastAPI, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
-from passlib.context import CryptContext
-from jose import JWTError, jwt
 from datetime import datetime, timedelta
-import os
+import uvicorn
+from models import (
+    User, LoginUser, Submission, Comment, StatusUpdate,
+    verify_password, get_password_hash, create_access_token,
+    get_current_user, get_user_role, ACCESS_TOKEN_EXPIRE_MINUTES, db
+)
 
-app = FastAPI()
+# Create FastAPI app with tags for documentation
+app = FastAPI(
+    openapi_tags=[
+        {
+            "name": "Authentication & Users",
+            "description": "Operations related to user registration, login, and user information.",
+        },
+        {
+            "name": "Create and Read Submissions",
+            "description": "Endpoints for creating new submissions and retrieving existing ones.",
+        },
+        {
+            "name": "Update Submissions",
+            "description": "Endpoints for updating submission details and status.",
+        },
+        {
+            "name": "Add Comment",
+            "description": "Endpoints for adding comments to submissions.",
+        },
+        {
+            "name": "Delete",
+            "description": "Endpoints for deleting submissions.",
+        },
+    ]
+)
 
-# MongoDB connection
-client = AsyncIOMotorClient("mongodb://localhost:27017")
-db = client["submission_system"]
+# API Endpoints (Routes)
 
-# Security
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-security = HTTPBearer()
-
-# Models
-class User(BaseModel):
-    username: str
-    password: str
-    role: str  # "student" or "admin"
-
-class LoginUser(BaseModel):
-    username: str
-    password: str
-
-class Submission(BaseModel):
-    title: str
-    content: str
-    project_head: str
-    budget: int
-    venue: str
-    organization_name: str
-    event_date: str
-    event_time: str
-
-class Comment(BaseModel):
-    comment: str
-
-class StatusUpdate(BaseModel):
-    status: str  # "approved" or "revision"
-
-# Helper functions
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        return username
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-async def get_user_role(username: str):
-    user = await db.users.find_one({"username": username})
-    return user["role"] if user else None
-
-# Routes
-@app.post("/register")
+# User registration endpoint
+@app.post("/register", tags=["Authentication & Users"])
 async def register(user: User):
     if await db.users.find_one({"username": user.username}):
         raise HTTPException(status_code=400, detail="Username already registered")
@@ -90,7 +48,8 @@ async def register(user: User):
     await db.users.insert_one(user_dict)
     return {"message": "User registered successfully"}
 
-@app.post("/login")
+# User login endpoint
+@app.post("/login", tags=["Authentication & Users"])
 async def login(user: LoginUser):
     db_user = await db.users.find_one({"username": user.username})
     if not db_user or not verify_password(user.password, db_user["password"]):
@@ -99,7 +58,8 @@ async def login(user: LoginUser):
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/submissions")
+# Create new submission (students only)
+@app.post("/submissions", tags=["Create and Read Submissions"])
 async def create_submission(submission: Submission, current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
     if role != "student":
@@ -120,7 +80,8 @@ async def create_submission(submission: Submission, current_user: str = Depends(
     result = await db.submissions.insert_one(submission_dict)
     return {"id": str(result.inserted_id)}
 
-@app.get("/submissions")
+# Get submissions (admins see all, students see their own)
+@app.get("/submissions", tags=["Create and Read Submissions"])
 async def get_submissions(current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
     if role == "admin":
@@ -131,7 +92,8 @@ async def get_submissions(current_user: str = Depends(get_current_user)):
         sub["_id"] = str(sub["_id"])
     return submissions
 
-@app.put("/submissions/{submission_id}")
+# Update submission details (students only, their own)
+@app.put("/submissions/{submission_id}", tags=["Update Submissions"])
 async def update_submission(
     submission_id: str,
     submission: Submission,
@@ -167,8 +129,8 @@ async def update_submission(
 
     return {"message": "Submission updated"}
 
-
-@app.post("/submissions/{submission_id}/comment")
+# Add comment to submission (admins only)
+@app.post("/submissions/{submission_id}/comment", tags=["Add Comment"])
 async def add_comment(submission_id: str, comment: Comment, current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
     if role != "admin":
@@ -185,7 +147,8 @@ async def add_comment(submission_id: str, comment: Comment, current_user: str = 
     await db.submissions.update_one({"_id": oid}, {"$push": {"comments": comment_dict}})
     return {"message": "Comment added"}
 
-@app.put("/submissions/{submission_id}/status")
+# Update submission status (admins only)
+@app.put("/submissions/{submission_id}/status", tags=["Update Submissions"])
 async def update_status(submission_id: str, status_update: StatusUpdate, current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
     if role != "admin":
@@ -199,7 +162,8 @@ async def update_status(submission_id: str, status_update: StatusUpdate, current
     await db.submissions.update_one({"_id": oid}, {"$set": {"status": status_update.status}})
     return {"message": "Status updated"}
 
-@app.delete("/submissions/{submission_id}")
+# Delete submission (students only, their own)
+@app.delete("/submissions/{submission_id}", tags=["Delete"])
 async def delete_submission(submission_id: str, current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
     if role != "student":
@@ -214,10 +178,15 @@ async def delete_submission(submission_id: str, current_user: str = Depends(get_
     await db.submissions.delete_one({"_id": oid})
     return {"message": "Submission deleted"}
 
-@app.get("/me")
+# Get current user info
+@app.get("/me", tags=["Authentication & Users"])
 async def get_me(current_user: str = Depends(get_current_user)):
     role = await get_user_role(current_user)
     return {"username": current_user, "role": role}
 
-# Mount static files
+# Serve static files (for frontend)
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
+
+# Run the app with uvicorn when executed directly
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8888, reload=True)

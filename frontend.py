@@ -3,9 +3,8 @@ import requests
 import json
 from datetime import datetime
 
-
 # Backend URL
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "http://localhost:8888"
 
 st.title("SOPAS")
 
