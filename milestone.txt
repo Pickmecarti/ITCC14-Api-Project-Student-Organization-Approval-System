@@ -1,0 +1,125 @@
+# MILESTONE 1: PROJECT INITIATION & PLANNING
+
+## What We Will Do
+- Define the overall project concept and scope.
+- Gather initial functional and non-functional requirements.
+- Research tools, frameworks, and assess feasibility.
+- Plan project timeline, workload distribution, and required resources.
+- Outline the high-level system architecture (front-end, back-end, database).
+
+## Deliverables
+- Clear project scope statement.
+- Initial requirements document (basic features + constraints).
+- Tool/technology feasibility report.
+- Preliminary project timeline and resource plan.
+- Initial system architecture diagram or outline.
+
+## Checklist
+- [ ] Define project topic and scope
+- [ ] Collect initial requirements
+- [ ] Research tools/frameworks (Flask, SQLite, etc.)
+- [ ] Create initial timeline & resource plan
+- [ ] Draft high-level system architecture
+- [ ] Commit planning documents to GitHub
+
+---
+
+# MILESTONE 2: REQUIREMENTS & DESIGN
+
+## What We Will Do
+- Finalize detailed system requirements (functional & non-functional).
+- Define user roles such as Student and Admin and their permissions.
+- Design the complete system architecture (front-end, API, database, authentication flow).
+- Design the database schema for core entities.
+- Plan API endpoints, including request/response formats and security considerations.
+
+## Deliverables
+- Detailed requirements specification document.
+- User roles & access control descriptions.
+- System architecture diagram (backend flow, database, API layers).
+- Database schema design (tables, relationships, keys).
+- API endpoint list with basic definitions and security notes.
+
+## Checklist
+- [ ] Finalize detailed requirements
+- [ ] Define Student/Admin roles and permissions
+- [ ] Create full system architecture design
+- [ ] Design database schema
+- [ ] Plan API endpoints + security considerations
+- [ ] Update documentation and push to GitHub
+
+---
+
+# MILESTONE 3: DEVELOPMENT
+
+## What We Will Do
+- Develop backend API (FastAPI)
+- Setup and integrate MongoDB
+- Implement authentication (JWT)
+- CRUD operations and role-based access
+- Develop frontend (Streamlit)
+
+## Deliverables
+- Functional backend API
+- Integrated MongoDB database
+- JWT authentication system
+- Role-based access control
+- Functional Streamlit frontend
+
+## Checklist
+- [ ] Backend API routes implemented
+- [ ] MongoDB connection established
+- [ ] JWT authentication working
+- [ ] CRUD operations functional
+- [ ] Role-based access tested
+- [ ] Frontend components built
+
+---
+
+# MILESTONE 4: TESTING
+
+## What We Will Do
+- Unit and integration testing
+- Test authentication, CRUD, roles, database
+- Error and edge case testing
+
+## Deliverables
+- Test suite and results
+- Bug fixes and improvements
+- Performance validation
+
+## Checklist
+- [ ] Frontend lists data correctly
+- [ ] Frontend creates data successfully
+- [ ] Frontend handles errors/loading states
+- [ ] Authentication tests pass
+- [ ] CRUD operations tests pass
+- [ ] Role-based access tests pass
+- [ ] Database integration tests pass
+- [ ] Run steps documented
+
+---
+
+# MILESTONE 5: DEPLOYMENT & DOCUMENTATION
+
+## What We Will Do
+- Deploy system and configure production
+- Final testing in production environment
+- Create user, API, and code documentation
+- Project presentation and submission
+
+## Deliverables
+- Deployed production system
+- Complete documentation
+- Final project presentation
+- Submission package
+
+## Checklist
+- [ ] System deployed to production
+- [ ] Production configuration completed
+- [ ] Final production testing passed
+- [ ] User documentation created
+- [ ] API documentation created
+- [ ] Code documentation complete
+- [ ] Project presentation prepared
+- [ ] All files submitted
