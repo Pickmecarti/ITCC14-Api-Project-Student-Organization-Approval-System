@@ -10,7 +10,7 @@ from models import (
     get_current_user, get_user_role, ACCESS_TOKEN_EXPIRE_MINUTES, db
 )
 
-# Create FastAPI app with tags for documentation
+# Create FastAPI app with tags for documentations
 app = FastAPI(
     openapi_tags=[
         {
@@ -34,6 +34,7 @@ app = FastAPI(
             "description": "Endpoints for deleting submissions.",
         },
     ]
+
 )
 
 # API Endpoints (Routes)
@@ -187,6 +188,6 @@ async def get_me(current_user: str = Depends(get_current_user)):
 # Serve static files (for frontend)
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
-# Run the app with uvicorn when executed directly
+# When the application is run directly, use uvicorn.
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8888, reload=True)
